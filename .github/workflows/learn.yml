@@ -1,4 +1,4 @@
-name: Release Pipeline
+name: My First Pipeline
 
 on:
   push:
@@ -6,68 +6,98 @@ on:
       - main
 
 jobs:
-  build:
+  learn-steps:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # Step 1 - print a message
+      - name: Say Hello
+        run: echo "Hello Data Engineer!"
 
-      # Dynamically find and read ALL files
-      - name: Read all files
+      # Step 2 - print variables
+      - name: Print Variables
         run: |
-          echo "=== All files found in repo ==="
-          find . -type f -not -path './.git/*'
-
-          echo "=== Reading each file ==="
-          find . -type f -not -path './.git/*' | while read file; do
-            echo "--- $file ---"
-            cat "$file"
-            echo ""
-          done
-
-      # Upload everything dynamically
-      - name: Upload all artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-artifacts
-          path: |
-            **/*.txt
-            **/*.csv
-            **/*.json
-            **/*.sql
-          if-no-files-found: warn
-
-  release:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: release-artifacts
-          path: release/
-
-      # Dynamically read everything that was downloaded
-      - name: Read all downloaded artifacts
-        run: |
-          echo "=== All downloaded files ==="
-          find release/ -type f
-
-          echo "=== Reading each file ==="
-          find release/ -type f | while read file; do
-            echo "--- $file ---"
-            cat "$file"
-            echo ""
-          done
-
-      # Show summary of what was released
-      - name: Release summary
-        run: |
-          echo "=== Release Summary ==="
+          echo "Repo name: ${{ github.repository }}"
           echo "Branch: ${{ github.ref_name }}"
-          echo "Commit: ${{ github.sha }}"
           echo "Triggered by: ${{ github.actor }}"
-          echo "Total files released:"
-          find release/ -type f | wc -l
+
+      # Step 3 - check environment
+      - name: Check Environment
+        run: |
+          echo "Current directory: $(pwd)"
+          echo "Current user: $(whoami)"
+          echo "Today's date: $(date)"
+
+      # Step 4 - create a file
+      - name: Create a File
+        run: |
+          mkdir output
+          echo "Hello from pipeline" > output/result.txt
+          cat output/result.txt
+
+      # Step 5 - list all files
+      - name: List Files
+        run: |
+          echo "=== All files ==="
+          find . -type f
+
+  learn-conditions:
+    runs-on: ubuntu-latest
+    needs: learn-steps
+
+    steps:
+      # Step 6 - only runs if previous job passed
+      - name: Previous job passed
+        run: echo "learn-steps succeeded so I ran!"
+
+      # Step 7 - always runs no matter what
+      - name: Always runs
+        if: always()
+        run: echo "I always run no matter what!"
+
+  learn-artifacts:
+    runs-on: ubuntu-latest
+    needs: learn-conditions
+
+    steps:
+      # Step 8 - create an artifact
+      - name: Create Artifact
+        run: |
+          mkdir output
+          echo "This is my artifact" > output/data.txt
+          echo "Created by: ${{ github.actor }}" >> output/data.txt
+
+      # Step 9 - list artifact before upload
+      - name: List Artifacts Before Upload
+        run: |
+          echo "=== Files to be uploaded ==="
+          find output -type f
+          echo "=== File contents ==="
+          cat output/data.txt
+
+      # Step 10 - upload the artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: my-first-artifact
+          path: output/
+
+  download-artifact:
+    runs-on: ubuntu-latest
+    needs: learn-artifacts
+
+    steps:
+      # Step 11 - download artifact from previous job
+      - name: Download Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: my-first-artifact
+          path: downloaded/
+
+      # Step 12 - verify what was downloaded
+      - name: Verify Downloaded Artifact
+        run: |
+          echo "=== Downloaded files ==="
+          find downloaded -type f
+          echo "=== File contents ==="
+          cat downloaded/data.txt
