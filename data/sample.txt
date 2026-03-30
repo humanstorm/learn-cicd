@@ -1,0 +1,4 @@
+Hello from my first release pipeline!
+This file was uploaded by GitHub Actions.
+Author: Your Name
+Date: 2024
