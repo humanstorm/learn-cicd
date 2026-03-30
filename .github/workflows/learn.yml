@@ -77,7 +77,7 @@ jobs:
 
       # Step 10 - upload the artifact
       - name: Upload Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: my-first-artifact
           path: output/
@@ -89,7 +89,7 @@ jobs:
     steps:
       # Step 11 - download artifact from previous job
       - name: Download Artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: my-first-artifact
           path: downloaded/
